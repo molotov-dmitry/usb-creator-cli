@@ -39,11 +39,13 @@ silentsudo 'mounting iso' mount -o loop "$iso" /media/iso
 
 silent 'copy files' cp -LR --preserve=all /media/iso/. /media/usb/
 
-silentsudo 'install syslinux' syslinux -s "$usb"
+silentsudo 'install syslinux' syslinux "$usb"
 
 silent 'rename isolinux to syslinux' mv /media/usb/isolinux /media/usb/syslinux
 silent 'rename isolinux to syslinux' mv /media/usb/syslinux/isolinux.cfg /media/usb/syslinux/syslinux.cfg
 silent 'rename isolinux to syslinux' mv /media/usb/syslinux/isolinux.bin /media/usb/syslinux/syslinux.bin
+
+silentsudo 'add try-usb' sed 's/file=\/cdrom/cdrom-detect\/try-usb=true file=\/cdrom/' -i /media/usb/syslinux/*.cfg
 
 silentsudo 'unmounting usb' umount -l /media/usb
 silentsudo 'unmounting usb' umount -l "$usb"
