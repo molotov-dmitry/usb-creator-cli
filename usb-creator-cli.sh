@@ -42,13 +42,10 @@ silentsudo 'mounting iso'   mount -o loop "$iso" "${isodir}"
 
 silent 'copy files'         cp -LR --preserve=all "${isodir}/". "${usbdir}/"
 
-#silentsudo 'install syslinux' syslinux "$usb"
-
-#silent 'rename isolinux to syslinux' mv "${usbdir}/isolinux" "${usbdir}/syslinux"
-#silent 'rename isolinux to syslinux' mv "${usbdir}/syslinux/isolinux.cfg" "${usbdir}/syslinux/syslinux.cfg"
-#silent 'rename isolinux to syslinux' mv "${usbdir}/syslinux/isolinux.bin" "${usbdir}/syslinux/syslinux.bin"
-
-#silentsudo 'add try-usb' sed 's/file=\/cdrom/cdrom-detect\/try-usb=true file=\/cdrom/' -i "${usbdir}/syslinux/"*.cfg
+if [[ -d "${isodir}/EFI/BOOT" && ! -e "${isodir}/EFI/BOOT/bootia32.efi" ]]
+then
+    silentsudo 'Getting EFI 32 image'       wget https://github.com/jfwells/linux-asus-t100ta/raw/master/boot/bootia32.efi -O "${isodir}/EFI/BOOT/bootia32.efi"
+fi
 
 sync
 
