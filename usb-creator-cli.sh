@@ -53,3 +53,5 @@ silentsudo 'unmounting usb' umount -l "${usbdir}"
 silentsudo 'unmounting usb' umount -l "$usb"
 silentsudo 'unmounting iso' umount -l "${isodir}"
 silentsudo 'unmounting iso' umount -l "$iso"
+
+silent '' beep -f 3000 -l 125 -r 2 -d 125
