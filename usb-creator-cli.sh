@@ -34,13 +34,13 @@ silentsudo 'unmounting usb' umount -l "${usbdir}"
 silentsudo 'unmounting usb' umount -l "$usb"
 #silentsudo 'make fs' mkdosfs -n 'LOAD' -I "$usb" -F 32
 silentsudo 'mounting usb'   mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER)
-silentsudo 'cleaning usb'   find /media/usb -mindepth 1 -delete
+silentsudo 'cleaning usb'   find "${usbdir}" -mindepth 1 -delete
 
 silentsudo 'unmounting iso' umount -l "${isodir}"
 silentsudo 'unmounting iso' umount -l "$iso"
 silentsudo 'mounting iso'   mount -o loop "$iso" "${isodir}"
 
-silent 'copy files'         cp -LR --preserve=all "${isodir}/". "${usbdir}/"
+rsync -ra -LK -pE --info=progress2 --exclude 'ubuntu' "${isodir}/" "${usbdir}/"
 
 if [[ -d "${isodir}/EFI/BOOT" && ! -e "${isodir}/EFI/BOOT/bootia32.efi" ]]
 then
