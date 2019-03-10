@@ -18,7 +18,7 @@ fi
 
 ### Install required packages ==================================================
 
-export DEBIAN_FRONTEND=noninteractive apt install -y syslinux mtools genisoimage beep > /dev/null
+DEBIAN_FRONTEND=noninteractive apt install -y syslinux mtools genisoimage beep > /dev/null
 
 ### Set variables ==============================================================
 
