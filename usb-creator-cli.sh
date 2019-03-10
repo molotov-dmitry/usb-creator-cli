@@ -32,11 +32,13 @@ usbdir="/tmp/media/${label}-usb"
 if [[ $(file -biL "$usb" | cut -d ';' -f 1) != "inode/blockdevice" ]]
 then
     echo "Error: USB disk '${label}' not found" >&2
+	exit 1
 fi
 
 if ! isoinfo -d -i "${iso}" >/dev/null 2>&1
 then
-    echo "Error: ISO image '${iso}' not found" >&2
+    echo "Error: ISO image '${iso}' not found or not a valid ISO image" >&2
+	exit 2
 fi
 
 ### Mount ISO and USB ==========================================================
@@ -47,11 +49,13 @@ mkdir -p "${usbdir}" > /dev/null
 umount -l "${usbdir}" > /dev/null
 umount -l "$usb" > /dev/null
 
-mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER) > /dev/null
-
 umount -l "${isodir}" > /dev/null
 umount -l "$iso" > /dev/null
-mount -o loop "$iso" "${isodir}" > /dev/null
+
+### Mount ISO and USB ==========================================================
+
+mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER) > /dev/null || exit 3
+mount -o loop "$iso" "${isodir}" > /dev/null || exit 4
 
 ### Clear USB ==================================================================
 
