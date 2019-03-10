@@ -3,55 +3,84 @@
 ROOT_PATH="$(cd "$(dirname "$0")" && pwd)"
 cd "${ROOT_PATH}" || exit 1
 
-. "${ROOT_PATH}/functions.sh"
+#### ===========================================================================
+#### ===========================================================================
+#### ===========================================================================
 
-sudo echo -n
+### Launching as root ==========================================================
 
-appinstall 'tools' 'syslinux mtools genisoimage'
+if [[ $(id -u) -ne 0 ]]
+then
+    echo 'Launching as root'
+    sudo bash $0 $@
+    exit $?
+fi
+
+### Install required packages ==================================================
+
+export DEBIAN_FRONTEND=noninteractive apt install -y syslinux mtools genisoimage beep > /dev/null
+
+### Set variables ==============================================================
 
 iso="$1"
-usb="$2"
+label="$2"
 
-isodir='/tmp/media/iso'
-usbdir='/tmp/media/usb'
+usb="/dev/disk/by-label/${label}"
 
-while [[ $(file -biL "$usb" | cut -d ';' -f 1) != "inode/blockdevice" ]]
-do
-    read -e -p "input device path: " usb
-done
+isodir="/tmp/media/${label}-iso"
+usbdir="/tmp/media/${label}-usb"
 
-while ! isoinfo -d -i "${iso/\~/$HOME}" >/dev/null 2>&1
-do
-    read -e -p "input iso path: " iso
-done
+### Check input ================================================================
 
-iso="${iso/\~/$HOME}"
+if [[ $(file -biL "$usb" | cut -d ';' -f 1) != "inode/blockdevice" ]]
+then
+    echo "Error: USB disk '${label}' not found" >&2
+fi
 
-silentsudo 'make dir for mounting iso' mkdir -p "${isodir}"
-silentsudo 'make dir for mounting usb' mkdir -p "${usbdir}"
+if ! isoinfo -d -i "${iso}" >/dev/null 2>&1
+then
+    echo "Error: ISO image '${iso}' not found" >&2
+fi
 
-silentsudo 'unmounting usb' umount -l "${usbdir}"
-silentsudo 'unmounting usb' umount -l "$usb"
-#silentsudo 'make fs' mkdosfs -n 'LOAD' -I "$usb" -F 32
-silentsudo 'mounting usb'   mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER)
-silentsudo 'cleaning usb'   find "${usbdir}" -mindepth 1 -delete
+### Mount ISO and USB ==========================================================
 
-silentsudo 'unmounting iso' umount -l "${isodir}"
-silentsudo 'unmounting iso' umount -l "$iso"
-silentsudo 'mounting iso'   mount -o loop "$iso" "${isodir}"
+mkdir -p "${isodir}" > /dev/null
+mkdir -p "${usbdir}" > /dev/null
+
+umount -l "${usbdir}" > /dev/null
+umount -l "$usb" > /dev/null
+
+mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER) > /dev/null
+
+umount -l "${isodir}" > /dev/null
+umount -l "$iso" > /dev/null
+mount -o loop "$iso" "${isodir}" > /dev/null
+
+### Clear USB ==================================================================
+
+find "${usbdir}" -mindepth 1 -delete > /dev/null
+
+### Copy files to USB ==========================================================
 
 rsync -ra -LK -pE --info=progress2 --exclude 'ubuntu' "${isodir}/" "${usbdir}/"
 
 if [[ -d "${isodir}/EFI/BOOT" && ! -e "${isodir}/EFI/BOOT/bootia32.efi" ]]
 then
-    silentsudo 'Getting EFI 32 image'       wget https://github.com/jfwells/linux-asus-t100ta/raw/master/boot/bootia32.efi -O "${isodir}/EFI/BOOT/bootia32.efi"
+    wget https://github.com/jfwells/linux-asus-t100ta/raw/master/boot/bootia32.efi -O "${isodir}/EFI/BOOT/bootia32.efi"
 fi
+
+### Sync =======================================================================
 
 sync
 
-silentsudo 'unmounting usb' umount -l "${usbdir}"
-silentsudo 'unmounting usb' umount -l "$usb"
-silentsudo 'unmounting iso' umount -l "${isodir}"
-silentsudo 'unmounting iso' umount -l "$iso"
+### Unmount ====================================================================
 
-silent '' beep -f 3000 -l 125 -r 2 -d 125
+umount -l "${usbdir}" > /dev/null
+umount -l "$usb" > /dev/null
+umount -l "${isodir}" > /dev/null
+umount -l "$iso" > /dev/null
+
+### Beep at finish =============================================================
+
+beep -f 3000 -l 125 -r 2 -d 125
+
