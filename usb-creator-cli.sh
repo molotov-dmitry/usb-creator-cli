@@ -65,9 +65,9 @@ find "${usbdir}" -mindepth 1 -delete > /dev/null
 
 rsync -ra -LK -pE --info=progress2 --exclude 'ubuntu' "${isodir}/" "${usbdir}/"
 
-if [[ -d "${isodir}/EFI/BOOT" && ! -e "${isodir}/EFI/BOOT/bootia32.efi" ]]
+if [[ -d "${usbdir}/EFI/BOOT" && ! -e "${usbdir}/EFI/BOOT/bootia32.efi" ]]
 then
-    wget https://github.com/jfwells/linux-asus-t100ta/raw/master/boot/bootia32.efi -O "${isodir}/EFI/BOOT/bootia32.efi"
+    wget https://github.com/jfwells/linux-asus-t100ta/raw/master/boot/bootia32.efi -O "${usbdir}/EFI/BOOT/bootia32.efi" || exit 1
 fi
 
 ### Sync =======================================================================
