@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s extglob
+
 #### ===========================================================================
 #### ===========================================================================
 #### ===========================================================================
@@ -15,12 +17,50 @@ fi
 
 ### Install required packages ==================================================
 
-DEBIAN_FRONTEND=noninteractive apt install -y syslinux mtools genisoimage beep > /dev/null
+DEBIAN_FRONTEND=noninteractive apt-get install -y syslinux mtools genisoimage beep > /dev/null
+
+### Getting parameters =========================================================
+
+labels="@($(ls -1 "/dev/disk/by-label" | tr '\n' '|' | sed 's/|$//'))"
+progress='--info=progress2'
+
+while [[ $# -gt 0 ]]
+do
+
+    case "$1" in
+
+    '--quiet')
+        nobeep='y'
+    ;;
+
+    '--test')
+        testonly='y'
+    ;;
+
+
+    '--no-progress')
+        progress=''
+    ;;
+
+    *.iso)
+        iso="$1"
+    ;;
+
+    ${labels})
+        label="$1"
+    ;;
+
+	*)
+		echo "Unknown argument '${1}'"
+	;; 
+
+    esac
+
+    shift
+
+done
 
 ### Set variables ==============================================================
-
-iso="$1"
-label="$2"
 
 usb="/dev/disk/by-label/${label}"
 
@@ -41,16 +81,23 @@ then
 	exit 2
 fi
 
+#### Exit if test only flag is set =============================================
+
+if [[ "$testonly" == 'y' ]]
+then
+    exit 0
+fi
+
 ### Mount ISO and USB ==========================================================
 
-mkdir -p "${isodir}" > /dev/null
-mkdir -p "${usbdir}" > /dev/null
+mkdir -p "${isodir}"  > /dev/null
+mkdir -p "${usbdir}"  > /dev/null
 
 umount -l "${usbdir}" > /dev/null
-umount -l "$usb" > /dev/null
+umount -l "$usb"      > /dev/null
 
 umount -l "${isodir}" > /dev/null
-umount -l "$iso" > /dev/null
+umount -l "$iso"      > /dev/null
 
 ### Mount ISO and USB ==========================================================
 
@@ -63,7 +110,7 @@ find "${usbdir}" -mindepth 1 -delete > /dev/null
 
 ### Copy files to USB ==========================================================
 
-rsync -ra -LK -pE --info=progress2 --exclude 'ubuntu' "${isodir}/" "${usbdir}/"
+rsync -ra -LK -pE ${progress} --exclude 'ubuntu' "${isodir}/" "${usbdir}/"
 
 if [[ -d "${usbdir}/EFI/BOOT" && ! -e "${usbdir}/EFI/BOOT/bootia32.efi" ]]
 then
@@ -77,11 +124,14 @@ sync
 ### Unmount ====================================================================
 
 umount -l "${usbdir}" > /dev/null
-umount -l "$usb" > /dev/null
+umount -l "$usb"      > /dev/null
 umount -l "${isodir}" > /dev/null
-umount -l "$iso" > /dev/null
+umount -l "$iso" 	  > /dev/null
 
 ### Beep at finish =============================================================
 
-beep -f 3000 -l 125 -r 2 -d 125
+if [[ "$nobeep" != 'y' ]]
+then
+    beep -f 2050 -r 2 -d 100 -l 30
+fi
 
