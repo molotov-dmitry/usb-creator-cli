@@ -91,12 +91,12 @@ usbdir="/tmp/media/${label}-usb"
 
 if [[ $(file -biL "$usb" | cut -d ';' -f 1) != "inode/blockdevice" ]]
 then
-	error 1 "dialog-error:USB disk '${label}' not found"
+	error 1 "USB disk '${label}' not found"
 fi
 
 if ! isoinfo -d -i "${iso}" >/dev/null 2>&1
 then
-	error 2 "dialog-error:ISO image '${iso}' not found or not a valid ISO image"
+	error 2 "ISO image '${iso}' not found or not a valid ISO image"
 fi
 
 #### Exit if test only flag is set =============================================
