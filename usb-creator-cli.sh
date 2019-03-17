@@ -15,6 +15,22 @@ then
     exit $?
 fi
 
+### Functions ==================================================================
+
+function error()
+{
+	local code="$1"
+	local message="$2"
+
+	if [[ "$notify" == 'y' ]]
+	then
+		echo "dialog-error:${message}" | nc -b -w1 -u 255.255.255.255 14993
+	fi
+
+    echo "Error: ${message}" >&2
+	exit $code
+}
+
 ### Install required packages ==================================================
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y syslinux mtools genisoimage beep > /dev/null
@@ -75,14 +91,12 @@ usbdir="/tmp/media/${label}-usb"
 
 if [[ $(file -biL "$usb" | cut -d ';' -f 1) != "inode/blockdevice" ]]
 then
-    echo "Error: USB disk '${label}' not found" >&2
-	exit 1
+	error 1 "dialog-error:USB disk '${label}' not found"
 fi
 
 if ! isoinfo -d -i "${iso}" >/dev/null 2>&1
 then
-    echo "Error: ISO image '${iso}' not found or not a valid ISO image" >&2
-	exit 2
+	error 2 "dialog-error:ISO image '${iso}' not found or not a valid ISO image"
 fi
 
 #### Exit if test only flag is set =============================================
@@ -105,8 +119,15 @@ umount -l "$iso"      > /dev/null
 
 ### Mount ISO and USB ==========================================================
 
-mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER) > /dev/null || exit 3
-mount -o loop "$iso" "${isodir}" > /dev/null || exit 4
+if ! mount "$usb" "${usbdir}" -o rw,uid=$(id -u $USER),gid=$(id -g $USER) > /dev/null
+then
+	error 3 "$usb not mounted"
+fi
+
+if ! mount -o loop "$iso" "${isodir}" > /dev/null
+then
+	error 4 "$iso not mounted"
+fi
 
 ### Clear USB ==================================================================
 
