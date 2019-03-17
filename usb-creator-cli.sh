@@ -42,6 +42,10 @@ do
         progress=''
     ;;
 
+    '--notify')
+        notify='y'
+    ;;
+
     *.iso)
         iso="$1"
     ;;
@@ -127,6 +131,13 @@ umount -l "${usbdir}" > /dev/null
 umount -l "$usb"      > /dev/null
 umount -l "${isodir}" > /dev/null
 umount -l "$iso" 	  > /dev/null
+
+### Send notify ================================================================
+
+if [[ "$notify" == 'y' ]]
+then
+    echo "usb-creator-gtk:$(basename "${iso}") write completed" | nc -b -w1 -u 255.255.255.255 14993
+fi
 
 ### Beep at finish =============================================================
 
