@@ -1,17 +1,18 @@
 
-BINDIR=$(PREFIX)/usr/local/bin
+TARGET		= usb-creator-cli
+INSTALL_DIR = $(PREFIX)/usr/local/bin
 
 .PHONY: all install uninstall
 
 all:
 
-$(BINDIR):
-	mkdir -p $(BINDIR)
+$(INSTALL_DIR):
+	mkdir -p $(INSTALL_DIR)
 
-$(BINDIR)/usb-creator-cli: $(BINDIR) usb-creator-cli.sh
-	install usb-creator-cli.sh $(BINDIR)/usb-creator-cli
+$(INSTALL_DIR)/$(TARGET): $(INSTALL_DIR) $(TARGET).sh
+	install $(TARGET).sh $(INSTALL_DIR)/$(TARGET)
 
-install: $(BINDIR)/usb-creator-cli
+install: $(INSTALL_DIR)/$(TARGET)
 
 uninstall:
-	rm -f $(BINDIR)/usb-creator-cli
+	rm -f $(INSTALL_DIR)/$(TARGET)
