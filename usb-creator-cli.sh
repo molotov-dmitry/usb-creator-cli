@@ -31,10 +31,6 @@ function error()
 	exit $code
 }
 
-### Install required packages ==================================================
-
-DEBIAN_FRONTEND=noninteractive apt-get install -y syslinux mtools genisoimage beep > /dev/null
-
 ### Getting parameters =========================================================
 
 labels="@($(ls -1 "/dev/disk/by-label" | tr '\n' '|' | sed 's/|$//'))"
