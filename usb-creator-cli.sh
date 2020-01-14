@@ -125,13 +125,9 @@ then
 	error 4 "$iso not mounted"
 fi
 
-### Clear USB ==================================================================
-
-find "${usbdir}" -mindepth 1 -delete > /dev/null
-
 ### Copy files to USB ==========================================================
 
-rsync -ra -LK -pE ${progress} --exclude 'ubuntu' "${isodir}/" "${usbdir}/"
+rsync -ra -LK -pE ${progress} --exclude 'ubuntu' --delete-before --delete-excluded "${isodir}/" "${usbdir}/"
 
 ### Sync =======================================================================
 
