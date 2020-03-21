@@ -57,6 +57,10 @@ do
     '--notify')
         notify='y'
     ;;
+    
+    '--check')
+        check='y'
+    ;;
 
     *.iso)
         iso="$1"
@@ -132,6 +136,24 @@ rsync -ra -LK -pE ${progress} --exclude 'ubuntu' --delete-before --delete-exclud
 ### Sync =======================================================================
 
 sync
+
+### Check data =================================================================
+
+if [[ "$check" == 'y' ]]
+then
+    pushd "$isodir" || error 5 "Failed to cd to $isodir"
+    md5sums="$(find -L -type f -exec md5sum {} \; 2>/dev/null)"
+    popd || error 5 "Failed to cd to $OLDPWD"
+    
+    pushd "$usbdir" || error 5 "Failed to cd to $usbdir"
+    if ! echo "${md5sums}" | md5sum -c --status
+    then
+        error 6 "Checksum validation failed"
+    fi
+    popd || error 5 "Failed to cd to $OLDPWD"
+    
+fi
+
 
 ### Unmount ====================================================================
 
