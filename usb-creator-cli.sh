@@ -41,8 +41,8 @@ do
 
     case "$1" in
 
-    '--quiet')
-        nobeep='y'
+    '--beep')
+        beep='y'
     ;;
 
     '--test')
@@ -149,7 +149,7 @@ fi
 
 ### Beep at finish =============================================================
 
-if [[ "$nobeep" != 'y' ]]
+if [[ "$beep" == 'y' ]]
 then
     beep -f 2050 -r 2 -d 100 -l 30
 fi
