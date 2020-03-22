@@ -124,7 +124,7 @@ then
 	error 3 "$usb not mounted"
 fi
 
-if ! mount -o loop "$iso" "${isodir}" > /dev/null
+if ! mount -o loop,ro "$iso" "${isodir}" > /dev/null
 then
 	error 4 "$iso not mounted"
 fi
