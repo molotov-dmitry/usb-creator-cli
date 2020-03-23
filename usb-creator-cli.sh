@@ -17,12 +17,12 @@ fi
 
 ### Functions ==================================================================
 
-function error()
 notify()
 {
     echo "$@" | nc -b -w1 -u 255.255.255.255 14993
 }
 
+error()
 {
 	local code="$1"
 	local message="$2"
