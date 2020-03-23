@@ -18,13 +18,18 @@ fi
 ### Functions ==================================================================
 
 function error()
+notify()
+{
+    echo "$@" | nc -b -w1 -u 255.255.255.255 14993
+}
+
 {
 	local code="$1"
 	local message="$2"
 
 	if [[ "$notify" == 'y' ]]
 	then
-		echo "dialog-error:${message}" | nc -b -w1 -u 255.255.255.255 14993
+		notify "dialog-error:${message}"
 	fi
 
     echo "Error: ${message}" >&2
@@ -166,7 +171,7 @@ umount -l "$iso" 	  > /dev/null
 
 if [[ "$notify" == 'y' ]]
 then
-    echo "usb-creator-gtk:$(basename "${iso}") write completed" | nc -b -w1 -u 255.255.255.255 14993
+    notify "usb-creator-gtk:$(basename "${iso}") write completed"
 fi
 
 ### Beep at finish =============================================================
