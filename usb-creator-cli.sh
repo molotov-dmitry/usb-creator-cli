@@ -89,8 +89,8 @@ done
 
 usb="/dev/disk/by-label/${label}"
 
-isodir="/tmp/media/${label}-iso"
-usbdir="/tmp/media/${label}-usb"
+isodir="/tmp/media/${label,,}-iso"
+usbdir="/tmp/media/${label,,}-usb"
 
 ### Check input ================================================================
 
