@@ -113,14 +113,27 @@ fi
 
 ### Mount ISO and USB ==========================================================
 
+### Create directories for mount points ----------------------------------------
+
 mkdir -p "${isodir}"  > /dev/null
 mkdir -p "${usbdir}"  > /dev/null
 
-umount -l "${usbdir}" > /dev/null
-umount -l "$usb"      > /dev/null
+### Unmount used mount points --------------------------------------------------
 
-umount -l "${isodir}" > /dev/null
-umount -l "$iso"      > /dev/null
+for point in "$usbdir" "$isodir"
+do
+    if mountpoint "$point" > /dev/null 2> /dev/null
+    then
+        umount "$point" || error 7 "Failed to unmount $point"
+    fi
+done
+
+### Unmount USB device ---------------------------------------------------------
+
+if grep "^$(realpath "$usb")[[:space:]]" /proc/mounts > /dev/null
+then
+    umount "$usb" || error 7 "Failed to unmount USB device $label"
+fi
 
 ### Mount ISO and USB ==========================================================
 
@@ -159,13 +172,24 @@ then
     
 fi
 
-
 ### Unmount ====================================================================
 
-umount -l "${usbdir}" > /dev/null
-umount -l "$usb"      > /dev/null
-umount -l "${isodir}" > /dev/null
-umount -l "$iso" 	  > /dev/null
+### Unmount used mount points --------------------------------------------------
+
+for point in "$usbdir" "$isodir"
+do
+    if mountpoint "$point" > /dev/null 2> /dev/null
+    then
+        umount "$point" || error 7 "Failed to unmount $point"
+    fi
+done
+
+### Unmount USB device ---------------------------------------------------------
+
+if grep "^$(realpath "$usb")[[:space:]]" /proc/mounts > /dev/null
+then
+    umount "$usb" || error 7 "Failed to unmount USB device $label"
+fi
 
 ### Send notify ================================================================
 
