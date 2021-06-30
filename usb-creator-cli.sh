@@ -40,6 +40,7 @@ error()
 
 labels="@($(ls -1 "/dev/disk/by-label" | tr '\n' '|' | sed 's/|$//'))"
 progress='--info=progress2'
+check='y'
 
 while [[ $# -gt 0 ]]
 do
@@ -63,8 +64,8 @@ do
         notify='y'
     ;;
     
-    '--check')
-        check='y'
+    '--no-check')
+        check='n'
     ;;
 
     *.iso)
