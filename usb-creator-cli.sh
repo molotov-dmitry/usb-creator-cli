@@ -150,7 +150,7 @@ fi
 
 ### Copy files to USB ==========================================================
 
-rsync -ra --checksum -LK -pE ${progress} --exclude 'ubuntu' --delete-before --delete-excluded "${isodir}/" "${usbdir}/"
+rsync -ra --checksum -LK -pE ${progress} --exclude '/ubuntu' --exclude '/debian' --delete-before --ignore-errors --delete-excluded "${isodir}/" "${usbdir}/"
 
 ### Sync =======================================================================
 
